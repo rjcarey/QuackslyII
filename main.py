@@ -4,17 +4,18 @@ from itertools import cycle
 from flask import Flask
 from threading import Thread
 import os
-from datetime import datetime
+from datetime import datetime, time
 
 TOKEN = os.environ['DISCORD_TOKEN']
 app = Flask('')
+announce = time(hour=12, minute=4)
 
 
 @app.route('/')
 def main():
-    time = str(datetime.now()).split('.')[0]
+    t = str(datetime.now()).split('.')[0]
     with open('log.txt', 'a') as f:
-        f.write(f"pinged at {time}\n")
+        f.write(f"pinged at {t}\n")
     return "Your Bot Is Ready"
 
 
@@ -40,6 +41,11 @@ async def on_ready():
 @tasks.loop(seconds=60)
 async def change_status():
     await bot.change_presence(activity=discord.Game(next(status)))
+
+
+@tasks.loop(time=announce)
+async def announcement():
+    print('pass')
 
 
 keep_alive()
