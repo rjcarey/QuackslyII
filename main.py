@@ -9,31 +9,38 @@ from datetime import datetime
 TOKEN = os.environ['DISCORD_TOKEN']
 app = Flask('')
 
+
 @app.route('/')
 def main():
-  time = str(datetime.now()).split('.')[0]
-  with open('log.txt', 'a') as f:
-    f.write(f"pinged at {time}\n")
-  return "Your Bot Is Ready"
+    time = str(datetime.now()).split('.')[0]
+    with open('log.txt', 'a') as f:
+        f.write(f"pinged at {time}\n")
+    return "Your Bot Is Ready"
+
 
 def run():
-  app.run(host="0.0.0.0", port=8000)
+    app.run(host="0.0.0.0", port=8000)
+
 
 def keep_alive():
-  server = Thread(target=run)
-  server.start()
+    server = Thread(target=run)
+    server.start()
+
 
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
-status = cycle(['with his deciples','god','duck, duck, goose'])
+status = cycle(["with his disciples", "duck sim 2K22", "god", "duck, duck, goose", "the battle of polytopia", "with sacred scripture", "in holy water", "with rubber ducks", "king's choice", "with his latest sacrifices"])
+
 
 @bot.event
 async def on_ready():
-  change_status.start()
-  print("Your bot is ready")
+    change_status.start()
+    print("up and running...")
 
-@tasks.loop(seconds=120)
+
+@tasks.loop(seconds=60)
 async def change_status():
-  await bot.change_presence(activity=discord.Game(next(status)))
+    await bot.change_presence(activity=discord.Game(next(status)))
+
 
 keep_alive()
 bot.run(TOKEN)
