@@ -8,7 +8,7 @@ from datetime import datetime, time
 
 TOKEN = os.environ['DISCORD_TOKEN']
 app = Flask('')
-announce = time(hour=12, minute=4)
+announce = time(hour=11, minute=10)
 
 
 @app.route('/')
@@ -35,6 +35,7 @@ status = cycle(["with his disciples", "duck sim 2K22", "god", "duck, duck, goose
 @bot.event
 async def on_ready():
     change_status.start()
+    announcement.start()
     print("up and running...")
 
 
