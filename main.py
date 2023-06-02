@@ -41,12 +41,12 @@ async def on_ready():
 
 @bot.command(name="snc", description="set channel as target for notifications")
 async def snc(ctx):
-    ctx.send('set notification channel')
+    await ctx.send('set notification channel')
 
 
 @bot.command(name="echo", description="echoes your message back to you")
 async def echo(ctx, payload):
-    ctx.send(payload)
+    await ctx.send(payload)
 
 
 @tasks.loop(seconds=60)
