@@ -6,11 +6,11 @@ from flask import Flask
 from threading import Thread
 import os
 from datetime import datetime, time
-from asyncio import sleep
 
 TOKEN = os.environ['DISCORD_TOKEN']
 app = Flask('')
-
+AUTOROLE_CID = 1114176147752755411
+NOTIF_CID = 1114176258469810237
 
 @app.route('/')
 def main():
@@ -58,19 +58,9 @@ async def rr(ctx, *args):
 
 @bot.command(name="test", description="temporary test functions")
 async def test(ctx, arg: int):
-    await ctx.send(ctx.guild.channels)
-    for channel in ctx.guild.channels:
-        try:
-            await sleep(0.5)
-            await ctx.send(channel.name)
-            msg = await channel.fetch_message(arg)
-            await ctx.send(msg.content)
-            return
-        except discord.errors.NotFound:
-            pass
-        except AttributeError:
-            pass
-    await ctx.send("message not found")
+    channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
+    msg = await channel.fetch_message(arg)
+    await ctx.send(msg.content)
 
 
 @tasks.loop(seconds=60)
@@ -80,27 +70,27 @@ async def change_status():
 
 @tasks.loop(time=time(hour=8))
 async def events():
-    await bot.get_channel(1114176258469810237).send('events start')
+    await bot.get_channel(NOTIF_CID).send('events start')
 
 
 @tasks.loop(time=time(hour=9))
 async def dragon():
-    await bot.get_channel(1114176258469810237).send('dragon island start')
+    await bot.get_channel(NOTIF_CID).send('dragon island start')
 
 
 @tasks.loop(time=time(hour=10))
 async def parade():
-    await bot.get_channel(1114176258469810237).send('parade start')
+    await bot.get_channel(NOTIF_CID).send('parade start')
 
 
 @tasks.loop(time=time(hour=10))
 async def hunting():
-    await bot.get_channel(1114176258469810237).send('hunting start')
+    await bot.get_channel(NOTIF_CID).send('hunting start')
 
 
 @tasks.loop(time=time(hour=18))
 async def pirates():
-    await bot.get_channel(1114176258469810237).send('pirates start')
+    await bot.get_channel(NOTIF_CID).send('pirates start')
 
 keep_alive()
 bot.run(TOKEN)
