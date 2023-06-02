@@ -57,16 +57,16 @@ async def rr(ctx, *args):
 
 @bot.command(name="test", description="temporary test functions")
 async def test(ctx, arg: int):
-    try:
-        for channel in ctx.guild.channels:
+    for channel in ctx.guild.channels:
+        try:
             print(channel.name)
             msg = await channel.fetch_message(arg)
             await ctx.send(msg.content)
             return
-    except discord.errors.NotFound:
-        pass
-    except AttributeError:
-        pass
+        except discord.errors.NotFound:
+            pass
+        except AttributeError:
+            pass
     await ctx.send("message not found")
 
 
