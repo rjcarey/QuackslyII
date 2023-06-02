@@ -6,6 +6,7 @@ from flask import Flask
 from threading import Thread
 import os
 from datetime import datetime, time
+from asyncio import sleep
 
 TOKEN = os.environ['DISCORD_TOKEN']
 app = Flask('')
@@ -57,9 +58,11 @@ async def rr(ctx, *args):
 
 @bot.command(name="test", description="temporary test functions")
 async def test(ctx, arg: int):
+    await ctx.send(ctx.guild.channels)
     for channel in ctx.guild.channels:
         try:
-            print(channel.name)
+            await sleep(0.5)
+            await ctx.send(channel.name)
             msg = await channel.fetch_message(arg)
             await ctx.send(msg.content)
             return
