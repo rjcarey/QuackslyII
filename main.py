@@ -45,8 +45,8 @@ async def snc(ctx):
 
 
 @bot.command(name="echo", description="echoes your message back to you")
-async def echo(ctx, payload):
-    await ctx.send(payload)
+async def echo(ctx, *, arg):
+    await ctx.send(arg)
 
 
 @tasks.loop(seconds=60)
