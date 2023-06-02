@@ -59,14 +59,14 @@ async def rr(ctx, *args):
 async def test(ctx, arg: int):
     msg = None
     try:
-        async for channel in ctx.guild.channels:
+        for channel in ctx.guild.channels:
             msg = await channel.fetch_message(arg)
     except discord.errors.NotFound:
         pass
     except AttributeError:
         pass
     if not msg:
-        ctx.send("message not found")
+        await ctx.send("message not found")
     else:
         await ctx.send(msg.content)
 
