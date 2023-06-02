@@ -50,13 +50,14 @@ async def echo(ctx, *, arg):
 
 
 @bot.command(name="rr", description="add an emote reaction to a message to give role")
-async def reactionrole(ctx, *args):
+async def rr(ctx, *args):
     pass
 
 
 @bot.command(name="test", description="temporary test functions")
-async def grabmessagebyid(ctx, arg: int):
-    await ctx.send(ctx.fetch_message(arg))
+async def test(ctx, arg: int):
+    msg = await ctx.fetch_message(arg)
+    await ctx.send(msg.content)
 
 
 @tasks.loop(seconds=60)
