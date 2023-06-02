@@ -49,6 +49,16 @@ async def echo(ctx, *, arg):
     await ctx.send(arg)
 
 
+@bot.command(name="rr", description="add an emote reaction to a message to give role")
+async def reactionrole(ctx, *args):
+    pass
+
+
+@bot.command(name="test", description="temporary test functions")
+async def grabmessagebyid(ctx, arg: int):
+    await ctx.send(ctx.fetch_message(arg))
+
+
 @tasks.loop(seconds=60)
 async def change_status():
     await bot.change_presence(activity=discord.Game(next(status)))
