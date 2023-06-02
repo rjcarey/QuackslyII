@@ -59,6 +59,7 @@ async def rr(ctx, *args):
 async def test(ctx, arg: int):
     try:
         for channel in ctx.guild.channels:
+            print(channel.name)
             msg = await channel.fetch_message(arg)
             await ctx.send(msg.content)
             return
