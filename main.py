@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands, tasks
+import discord.errors
 from itertools import cycle
 from flask import Flask
 from threading import Thread
@@ -56,8 +57,18 @@ async def rr(ctx, *args):
 
 @bot.command(name="test", description="temporary test functions")
 async def test(ctx, arg: int):
-    msg = await ctx.fetch_message(arg)
-    await ctx.send(msg.content)
+    msg = None
+    try:
+        async for channel in ctx.guild.channels:
+            msg = await channel.fetch_message(arg)
+    except discord.errors.NotFound:
+        pass
+    except AttributeError:
+        pass
+    if not msg:
+        ctx.send("message not found")
+    else:
+        await ctx.send(msg.content)
 
 
 @tasks.loop(seconds=60)
