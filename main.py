@@ -35,13 +35,13 @@ def keep_alive():
     server.start()
 
 
-bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
+bot = commands.Bot(command_prefix='/', intents=discord.Intents.all(), help_command=None)
 status = cycle(["with his disciples", "duck sim 2K22", "god", "duck, duck, goose", "the battle of polytopia", "with sacred scripture", "in holy water", "with rubber ducks", "king's choice", "with his latest sacrifices"])
 
 
 @bot.event
 async def on_ready():
-    bot_tasks = [change_status, events, dragon, parade, hunting, pirates]
+    bot_tasks = [change_status, events, dragon, parade_hunting_ball, pirates]
     for task in bot_tasks:
         task.start()
     print("up and running...")
@@ -103,6 +103,18 @@ async def rr(ctx, messageID, _, emote):
     await ctx.send("reaction role added")
 
 
+@bot.command(name="drr", description="delete a reaction role")
+async def drr(ctx, messageID, emote):
+    channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
+    msg = await channel.fetch_message(messageID)
+    response, passed = runSQL(f"DELETE FROM reactionroles WHERE m_id = {messageID} and emote = '{emote}';", False)
+    if not passed:
+        await ctx.send(response)
+        return
+    await msg.clear_reaction(emote)
+    await ctx.send("reaction role deleted")
+
+
 @bot.event
 async def on_reaction_add(reaction, user):
     if reaction.message.channel.id == AUTOROLE_CID:
@@ -135,27 +147,24 @@ async def change_status():
 
 @tasks.loop(time=time(hour=8))
 async def events():
-    await bot.get_channel(NOTIF_CID).send('events start')
+    await bot.get_channel(NOTIF_CID).send("🔴🎭 hear ye, hear ye, events hath commenced 🎭🔴 <@&1114526611556012082>")
 
 
 @tasks.loop(time=time(hour=9))
 async def dragon():
-    await bot.get_channel(NOTIF_CID).send('dragon island start')
+    await bot.get_channel(NOTIF_CID).send("🔴🐲 rawr, beware, dragons have returned to their islands 🐲🔴 <@&1114526867895091301>")
 
 
 @tasks.loop(time=time(hour=10))
-async def parade():
-    await bot.get_channel(NOTIF_CID).send('parade start')
-
-
-@tasks.loop(time=time(hour=10))
-async def hunting():
-    await bot.get_channel(NOTIF_CID).send('hunting start')
+async def parade_hunting_ball():
+    await bot.get_channel(NOTIF_CID).send("🔴🎪 *ridiculous trumpet solos*, the parades have started, *marching band marches by* 🎪🔴 <@&1114527261077544960>")
+    await bot.get_channel(NOTIF_CID).send("🔴🔫 grab your ghillie suits, hunting trips are departing 🔫🔴 <@&1114527669598568530>")
+    await bot.get_channel(NOTIF_CID).send("🔴💃 don your dancing shoes, the ball has started 💃🔴 <@&1114554773048406047>")
 
 
 @tasks.loop(time=time(hour=18))
 async def pirates():
-    await bot.get_channel(NOTIF_CID).send('pirates start')
+    await bot.get_channel(NOTIF_CID).send("🔴🏴‍☠️ Yarrr… there’re scallywags ashore ye land lubbers! 🏴‍☠️🔴 <@&1114525168904187934>")
 
 keep_alive()
 bot.run(TOKEN)
