@@ -52,8 +52,10 @@ async def echo(ctx, *, arg):
 
 
 @bot.command(name="rr", description="add an emote reaction to a message to give role")
-async def rr(ctx, *args):
-    pass
+async def rr(ctx, messageID, role, emote):
+    msg = await ctx.guild.fetch_channel(AUTOROLE_CID).fetch_message(messageID)
+    # store reaction-role
+    await msg.add_reaction(emote)
 
 
 @bot.command(name="test", description="temporary test functions")
