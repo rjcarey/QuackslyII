@@ -6,18 +6,24 @@ from flask import Flask
 from threading import Thread
 import os
 from datetime import datetime, time
+import sqlite3
 
 TOKEN = os.environ['DISCORD_TOKEN']
 app = Flask('')
 AUTOROLE_CID = 1114176147752755411
 NOTIF_CID = 1114176258469810237
+DATABASE = 'data.db'
+SCHEMAS = {
+    "reactionroles": "CREATE TABLE reactionroles (m_id INT NOT NULL, emote TEXT NOT NULL, r_id INT NOT NULL, PRIMARY KEY (m_id, emote));"
+}
+
 
 @app.route('/')
 def main():
     t = str(datetime.now()).split('.')[0]
     with open('log.txt', 'a') as f:
         f.write(f"pinged at {t}\n")
-    return "Your Bot Is Ready"
+    return "up and running..."
 
 
 def run():
@@ -51,12 +57,68 @@ async def echo(ctx, *, arg):
     await ctx.send(arg)
 
 
+@bot.command(name="sql", description="admin command")
+async def sql(ctx, *, arg):
+    if not await bot.is_owner(ctx.author):
+        ctx.send("you do not have permission to use this command")
+        return
+    select = False
+    if arg.split()[0].upper() == "SELECT":
+        select = True
+    response, passed = runSQL(arg, select)
+    if passed and not select:
+        response = "SQL executed"
+    ctx.send(response)
+
+
+def runSQL(command, select):
+    res, p, con, cur = False, True, None, None
+    try:
+        con = sqlite3.connect(DATABASE)
+        cur = con.cursor()
+        cur.execute(command)
+        if select:
+            res = cur.fetchall()
+        else:
+            con.commit()
+    except sqlite3.Error as e:
+        res = e
+        p = False
+    finally:
+        if con:
+            cur.close()
+            con.close()
+    return res, p
+
+
 @bot.command(name="rr", description="add an emote reaction to a message to give role")
-async def rr(ctx, messageID, role, emote):
+async def rr(ctx, messageID, _, emote):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
     msg = await channel.fetch_message(messageID)
-    # store reaction-role
+    response, passed = runSQL(f"INSERT INTO reactionroles(m_id, emote, r_id) VALUES({messageID}, '{emote}', {ctx.message.role_mentions[0].id});", False)
+    if not passed:
+        ctx.send(response)
+        return
     await msg.add_reaction(emote)
+    ctx.send("reaction role added")
+
+
+@bot.event
+async def on_reaction_add(reaction, user):
+    if reaction.message.channel.id == AUTOROLE_CID:
+        response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
+        if passed:
+            role = discord.utils.get(reaction.message.guild.roles, id=int(response[0][0]))
+            await user.add_roles(role)
+
+
+@bot.event
+async def on_reaction_remove(reaction, user):
+    if reaction.message.channel.id == AUTOROLE_CID:
+        response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
+        if passed:
+            role = discord.utils.get(reaction.message.guild.roles, id=int(response[0][0]))
+            await user.remove_roles(role)
 
 
 @bot.command(name="test", description="temporary test functions")
