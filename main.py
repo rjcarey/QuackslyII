@@ -112,9 +112,10 @@ async def on_raw_reaction_add(reaction):
         response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message_id} AND emote = '{reaction.emoji}';", True)
         guild = bot.get_guild(reaction.guild_id)
         if passed:
-            role = discord.utils.get(guild.roles, id=int(response[0][0]))
-            member = discord.utils.get(guild.members, id=reaction.user_id)
-            await member.add_roles(role)
+            if response:
+                role = discord.utils.get(guild.roles, id=int(response[0][0]))
+                member = discord.utils.get(guild.members, id=reaction.user_id)
+                await member.add_roles(role)
         else:
             channel = await guild.fetch_channel(LOG_CID)
             await channel.send(str(response))
@@ -125,10 +126,10 @@ async def on_raw_reaction_remove(reaction):
         response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message_id} AND emote = '{reaction.emoji}';", True)
         guild = bot.get_guild(reaction.guild_id)
         if passed:
-            role = discord.utils.get(guild.roles, id=int(response[0][0]))
-            member = discord.utils.get(guild.members, id=reaction.user_id)
-            # member = reaction.member if reaction.event_type == 'REACTION_ADD' else member_from_reaction_remove(guild, reaction.message_id, reaction.emoji, role)
-            await member.remove_roles(role)
+            if response:
+                role = discord.utils.get(guild.roles, id=int(response[0][0]))
+                member = discord.utils.get(guild.members, id=reaction.user_id)
+                await member.remove_roles(role)
         else:
             channel = await guild.fetch_channel(LOG_CID)
             await channel.send(str(response))
