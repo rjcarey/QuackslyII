@@ -107,26 +107,31 @@ async def drr(ctx, messageID, emote):
     await ctx.send("reaction role deleted")
 
 @bot.event
-async def on_raw_reaction_add(reaction, user):
-    if reaction.message.channel.id == AUTOROLE_CID:
-        response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
+async def on_raw_reaction_add(reaction):
+    if reaction.channel_id == AUTOROLE_CID:
+        response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message_id} AND emote = '{reaction.emoji}';", True)
+        guild = bot.get_guild(reaction.guild_id)
         if passed:
-            role = discord.utils.get(reaction.message.guild.roles, id=int(response[0][0]))
-            await user.add_roles(role)
+            role = discord.utils.get(guild.roles, id=int(response[0][0]))
+            member = discord.utils.get(guild.members, id=reaction.user_id)
+            await member.add_roles(role)
         else:
-            channel = await reaction.message.guild.fetch_channel(LOG_CID)
-            await channel.send(response)
+            channel = await guild.fetch_channel(LOG_CID)
+            await channel.send(str(response))
 
 @bot.event
-async def on_raw_reaction_remove(reaction, user):
-    if reaction.message.channel.id == AUTOROLE_CID:
-        response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
+async def on_raw_reaction_remove(reaction):
+    if reaction.channel_id == AUTOROLE_CID:
+        response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message_id} AND emote = '{reaction.emoji}';", True)
+        guild = bot.get_guild(reaction.guild_id)
         if passed:
-            role = discord.utils.get(reaction.message.guild.roles, id=int(response[0][0]))
-            await user.remove_roles(role)
+            role = discord.utils.get(guild.roles, id=int(response[0][0]))
+            member = discord.utils.get(guild.members, id=reaction.user_id)
+            # member = reaction.member if reaction.event_type == 'REACTION_ADD' else member_from_reaction_remove(guild, reaction.message_id, reaction.emoji, role)
+            await member.remove_roles(role)
         else:
-            channel = await reaction.message.guild.fetch_channel(LOG_CID)
-            await channel.send(response)
+            channel = await guild.fetch_channel(LOG_CID)
+            await channel.send(str(response))
 
 @bot.command(name="test", description="temporary test functions")
 async def test(ctx, arg: int):
