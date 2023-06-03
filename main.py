@@ -12,11 +12,11 @@ TOKEN = os.environ['DISCORD_TOKEN']
 app = Flask('')
 AUTOROLE_CID = 1114176147752755411
 NOTIF_CID = 1114176258469810237
+LOG_CID = 1114571677574103190
 DATABASE = 'data.db'
 SCHEMAS = {
     "reactionroles": "CREATE TABLE reactionroles (m_id INT NOT NULL, emote TEXT NOT NULL, r_id INT NOT NULL, PRIMARY KEY (m_id, emote));"
 }
-
 
 @app.route('/')
 def main():
@@ -25,10 +25,8 @@ def main():
         f.write(f"pinged at {t}\n")
     return "up and running..."
 
-
 def run():
     app.run(host="0.0.0.0", port=8000)
-
 
 def keep_alive():
     server = Thread(target=run)
@@ -46,16 +44,13 @@ async def on_ready():
         task.start()
     print("up and running...")
 
-
 @bot.command(name="snc", description="set channel as target for notifications")
 async def snc(ctx):
     await ctx.send('set notification channel')
 
-
 @bot.command(name="echo", description="echoes your message back to you")
 async def echo(ctx, *, arg):
     await ctx.send(arg)
-
 
 @bot.command(name="sql", description="admin command")
 async def sql(ctx, *, arg):
@@ -69,7 +64,6 @@ async def sql(ctx, *, arg):
     if passed and not select:
         response = "SQL executed"
     await ctx.send(response)
-
 
 def runSQL(command, select):
     res, p, con, cur = False, True, None, None
@@ -90,7 +84,6 @@ def runSQL(command, select):
             con.close()
     return res, p
 
-
 @bot.command(name="rr", description="add an emote reaction to a message to give role")
 async def rr(ctx, messageID, _, emote):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
@@ -101,7 +94,6 @@ async def rr(ctx, messageID, _, emote):
         return
     await msg.add_reaction(emote)
     await ctx.send("reaction role added")
-
 
 @bot.command(name="drr", description="delete a reaction role")
 async def drr(ctx, messageID, emote):
@@ -114,24 +106,33 @@ async def drr(ctx, messageID, emote):
     await msg.clear_reaction(emote)
     await ctx.send("reaction role deleted")
 
-
 @bot.event
 async def on_reaction_add(reaction, user):
     if reaction.message.channel.id == AUTOROLE_CID:
+        print(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';")
         response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
+        print(f"{response} | {passed}")
         if passed:
             role = discord.utils.get(reaction.message.guild.roles, id=int(response[0][0]))
+            print(f"{role}")
+            print(f"user")
             await user.add_roles(role)
-
+        else:
+            channel = await reaction.message.guild.fetch_channel(LOG_CID)
+            await channel.send(response)
 
 @bot.event
 async def on_reaction_remove(reaction, user):
     if reaction.message.channel.id == AUTOROLE_CID:
+        print(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';")
         response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
+        print(f"{response} | {passed}")
         if passed:
             role = discord.utils.get(reaction.message.guild.roles, id=int(response[0][0]))
             await user.remove_roles(role)
-
+        else:
+            channel = await reaction.message.guild.fetch_channel(LOG_CID)
+            await channel.send(response)
 
 @bot.command(name="test", description="temporary test functions")
 async def test(ctx, arg: int):
@@ -139,28 +140,23 @@ async def test(ctx, arg: int):
     msg = await channel.fetch_message(arg)
     await ctx.send(msg.content)
 
-
 @tasks.loop(seconds=60)
 async def change_status():
     await bot.change_presence(activity=discord.Game(next(status)))
-
 
 @tasks.loop(time=time(hour=8))
 async def events():
     await bot.get_channel(NOTIF_CID).send("🔴🎭 hear ye, hear ye, events hath commenced 🎭🔴 <@&1114526611556012082>")
 
-
 @tasks.loop(time=time(hour=9))
 async def dragon():
     await bot.get_channel(NOTIF_CID).send("🔴🐲 rawr, beware, dragons have returned to their islands 🐲🔴 <@&1114526867895091301>")
-
 
 @tasks.loop(time=time(hour=10))
 async def parade_hunting_ball():
     await bot.get_channel(NOTIF_CID).send("🔴🎪 *ridiculous trumpet solos*, the parades have started, *marching band marches by* 🎪🔴 <@&1114527261077544960>")
     await bot.get_channel(NOTIF_CID).send("🔴🔫 grab your ghillie suits, hunting trips are departing 🔫🔴 <@&1114527669598568530>")
     await bot.get_channel(NOTIF_CID).send("🔴💃 don your dancing shoes, the ball has started 💃🔴 <@&1114554773048406047>")
-
 
 @tasks.loop(time=time(hour=18))
 async def pirates():
