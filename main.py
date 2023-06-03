@@ -107,7 +107,7 @@ async def drr(ctx, messageID, emote):
     await ctx.send("reaction role deleted")
 
 @bot.event
-async def on_reaction_add(reaction, user):
+async def on_raw_reaction_add(reaction, user):
     if reaction.message.channel.id == AUTOROLE_CID:
         print(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';")
         response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
@@ -122,7 +122,7 @@ async def on_reaction_add(reaction, user):
             await channel.send(response)
 
 @bot.event
-async def on_reaction_remove(reaction, user):
+async def on_raw_reaction_remove(reaction, user):
     if reaction.message.channel.id == AUTOROLE_CID:
         print(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';")
         response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
