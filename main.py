@@ -60,7 +60,7 @@ async def echo(ctx, *, arg):
 @bot.command(name="sql", description="admin command")
 async def sql(ctx, *, arg):
     if not await bot.is_owner(ctx.author):
-        ctx.send("you do not have permission to use this command")
+        await ctx.send("you do not have permission to use this command")
         return
     select = False
     if arg.split()[0].upper() == "SELECT":
@@ -68,7 +68,7 @@ async def sql(ctx, *, arg):
     response, passed = runSQL(arg, select)
     if passed and not select:
         response = "SQL executed"
-    ctx.send(response)
+    await ctx.send(response)
 
 
 def runSQL(command, select):
@@ -97,10 +97,10 @@ async def rr(ctx, messageID, _, emote):
     msg = await channel.fetch_message(messageID)
     response, passed = runSQL(f"INSERT INTO reactionroles(m_id, emote, r_id) VALUES({messageID}, '{emote}', {ctx.message.role_mentions[0].id});", False)
     if not passed:
-        ctx.send(response)
+        await ctx.send(response)
         return
     await msg.add_reaction(emote)
-    ctx.send("reaction role added")
+    await ctx.send("reaction role added")
 
 
 @bot.event
