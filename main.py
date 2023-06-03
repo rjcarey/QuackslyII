@@ -109,13 +109,9 @@ async def drr(ctx, messageID, emote):
 @bot.event
 async def on_raw_reaction_add(reaction, user):
     if reaction.message.channel.id == AUTOROLE_CID:
-        print(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';")
         response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
-        print(f"{response} | {passed}")
         if passed:
             role = discord.utils.get(reaction.message.guild.roles, id=int(response[0][0]))
-            print(f"{role}")
-            print(f"user")
             await user.add_roles(role)
         else:
             channel = await reaction.message.guild.fetch_channel(LOG_CID)
@@ -124,9 +120,7 @@ async def on_raw_reaction_add(reaction, user):
 @bot.event
 async def on_raw_reaction_remove(reaction, user):
     if reaction.message.channel.id == AUTOROLE_CID:
-        print(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';")
         response, passed = runSQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message.id} AND emote = '{reaction.emoji}';", True)
-        print(f"{response} | {passed}")
         if passed:
             role = discord.utils.get(reaction.message.guild.roles, id=int(response[0][0]))
             await user.remove_roles(role)
