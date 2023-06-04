@@ -7,12 +7,12 @@ import sqlite3
 from qsconstants import TOKEN, AUTOROLE_CID, NOTIF_CID, LOG_CID, DATABASE, SCHEMAS, status, CHANGELOG
 from keepalive import keep_alive
 from random import randint, random
-import pkg_resources
-pkg_resources.require("googletrans==3.1.0a0")
-import googletrans
+# import pkg_resources
+# pkg_resources.require("googletrans==3.1.0a0")
+# import googletrans
 
 ###   BOT START   ###
-translator = googletrans.Translator()
+# translator = googletrans.Translator()
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all(), help_command=None)
 @bot.event
 async def on_ready():
@@ -540,11 +540,11 @@ async def on_raw_reaction_remove(reaction):
 @bot.event
 async def on_message(msg):
     if msg.content[0] == '/':
-        if msg.content[1:3] in googletrans.LANGUAGES.keys():
-            txt = f"{msg.author.name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
-            await msg.channel.send(txt)
-        else:
-            await custom_command(msg.channel, msg.author.id, msg.content)
+        # if msg.content[1:3] in googletrans.LANGUAGES.keys():
+            # txt = f"{msg.author.name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
+            # await msg.channel.send(txt)
+        # else:
+        await custom_command(msg.channel, msg.author.id, msg.content)
     else:
         await passover(msg.guild, msg.author.id, msg.author.name)
 
