@@ -42,7 +42,7 @@ def run_SQL(command, select):
             con.close()
     return res, p
 
-def custom_command(channel, m_id, request):
+async def custom_command(channel, m_id, request):
     response, passed = run_SQL(f"SELECT request, response, image, paymin, paymax, cooldown, lastused, negresponse, bad FROM bot WHERE request = '{request}';", True)
     if passed and not response:
         response, passed = run_SQL(f"SELECT response, image FROM commands WHERE request = '{request}';", True)
@@ -77,7 +77,7 @@ def custom_command(channel, m_id, request):
     if not passed:
         await channel.send(str(response))
 
-def passover(guild, m_id, member):
+async def passover(guild, m_id, member):
     channel = await guild.fetch_channel(LOG_CID)
     response, passed = run_SQL(f"SELECT money, daily FROM members WHERE uid = '{m_id}';", True)
     if response and passed:
@@ -412,7 +412,7 @@ async def shop(ctx, item=None):
         await ctx.send(str(response))
 
 @bot.command(name="additem", description="add item to shop", hidden=True)
-def addItem(ctx, *, args):
+async def addItem(ctx, *, args):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
     args = args.strip().split(' ', 1)
@@ -544,9 +544,9 @@ async def on_message(msg):
             txt = f"{msg.author.name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
             await msg.channel.send(txt)
         else:
-            custom_command(msg.channel, msg.author.id, msg.content)
+            await custom_command(msg.channel, msg.author.id, msg.content)
     else:
-        passover(msg.guild, msg.author.id, msg.author.name)
+        await passover(msg.guild, msg.author.id, msg.author.name)
 
 
 ###   LOOPS   ###
