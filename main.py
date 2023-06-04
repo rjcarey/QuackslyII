@@ -1,41 +1,12 @@
 import discord
 from discord.ext import commands, tasks
 import discord.errors
-from itertools import cycle
-from flask import Flask
-from threading import Thread
-import os
-from datetime import datetime, time
+from datetime import time
 import sqlite3
-
-TOKEN = os.environ['DISCORD_TOKEN']
-app = Flask('')
-AUTOROLE_CID = 1114176147752755411
-NOTIF_CID = 1114176258469810237
-LOG_CID = 1114571677574103190
-DATABASE = 'data.db'
-SCHEMAS = {
-    "reactionroles": "CREATE TABLE reactionroles (m_id INT NOT NULL, emote TEXT NOT NULL, r_id INT NOT NULL, PRIMARY KEY (m_id, emote));"
-}
-
-@app.route('/')
-def main():
-    t = str(datetime.now()).split('.')[0]
-    with open('log.txt', 'a') as f:
-        f.write(f"pinged at {t}\n")
-    return "up and running..."
-
-def run():
-    app.run(host="0.0.0.0", port=8000)
-
-def keep_alive():
-    server = Thread(target=run)
-    server.start()
-
+from qsconstants import TOKEN, AUTOROLE_CID, NOTIF_CID, LOG_CID, DATABASE, SCHEMAS, status
+from keepalive import keep_alive
 
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all(), help_command=None)
-status = cycle(["with his disciples", "duck sim 2K22", "god", "duck, duck, goose", "the battle of polytopia", "with sacred scripture", "in holy water", "with rubber ducks", "king's choice", "with his latest sacrifices"])
-
 
 @bot.event
 async def on_ready():
@@ -161,6 +132,7 @@ async def parade_hunting_ball():
 @tasks.loop(time=time(hour=18))
 async def pirates():
     await bot.get_channel(NOTIF_CID).send("🔴🏴‍☠️ Yarrr… there’re scallywags ashore ye land lubbers! 🏴‍☠️🔴 <@&1114525168904187934>")
+
 
 keep_alive()
 bot.run(TOKEN)
