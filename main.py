@@ -6,8 +6,8 @@ import sqlite3
 from qsconstants import TOKEN, AUTOROLE_CID, NOTIF_CID, LOG_CID, DATABASE, SCHEMAS, status
 from keepalive import keep_alive
 
+###   BOT START   ###
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all(), help_command=None)
-
 @bot.event
 async def on_ready():
     bot_tasks = [change_status, events, dragon, parade_hunting_ball, pirates]
@@ -15,6 +15,29 @@ async def on_ready():
         task.start()
     print("up and running...")
 
+
+###   FUNCTIONS   ###
+def runSQL(command, select):
+    res, p, con, cur = False, True, None, None
+    try:
+        con = sqlite3.connect(DATABASE)
+        cur = con.cursor()
+        cur.execute(command)
+        if select:
+            res = cur.fetchall()
+        else:
+            con.commit()
+    except sqlite3.Error as e:
+        res = e
+        p = False
+    finally:
+        if con:
+            cur.close()
+            con.close()
+    return res, p
+
+
+###   COMMANDS   ###
 @bot.command(name="snc", description="set channel as target for notifications")
 async def snc(ctx):
     await ctx.send('set notification channel')
@@ -35,25 +58,6 @@ async def sql(ctx, *, arg):
     if passed and not select:
         response = "SQL executed"
     await ctx.send(response)
-
-def runSQL(command, select):
-    res, p, con, cur = False, True, None, None
-    try:
-        con = sqlite3.connect(DATABASE)
-        cur = con.cursor()
-        cur.execute(command)
-        if select:
-            res = cur.fetchall()
-        else:
-            con.commit()
-    except sqlite3.Error as e:
-        res = e
-        p = False
-    finally:
-        if con:
-            cur.close()
-            con.close()
-    return res, p
 
 @bot.command(name="rr", description="add an emote reaction to a message to give role")
 async def rr(ctx, messageID, _, emote):
@@ -77,6 +81,14 @@ async def drr(ctx, messageID, emote):
     await msg.clear_reaction(emote)
     await ctx.send("reaction role deleted")
 
+@bot.command(name="test", description="temporary test functions")
+async def test(ctx, arg: int):
+    channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
+    msg = await channel.fetch_message(arg)
+    await ctx.send(msg.content)
+
+
+###   LISTENERS   ###
 @bot.event
 async def on_raw_reaction_add(reaction):
     if reaction.channel_id == AUTOROLE_CID:
@@ -105,16 +117,14 @@ async def on_raw_reaction_remove(reaction):
             channel = await guild.fetch_channel(LOG_CID)
             await channel.send(str(response))
 
-@bot.command(name="test", description="temporary test functions")
-async def test(ctx, arg: int):
-    channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
-    msg = await channel.fetch_message(arg)
-    await ctx.send(msg.content)
 
+###   LOOPS   ###
 @tasks.loop(seconds=60)
 async def change_status():
     await bot.change_presence(activity=discord.Game(next(status)))
 
+
+###   ALARMS   ###
 @tasks.loop(time=time(hour=8))
 async def events():
     await bot.get_channel(NOTIF_CID).send("🔴🎭 hear ye, hear ye, events hath commenced 🎭🔴 <@&1114526611556012082>")
@@ -134,5 +144,6 @@ async def pirates():
     await bot.get_channel(NOTIF_CID).send("🔴🏴‍☠️ Yarrr… there’re scallywags ashore ye land lubbers! 🏴‍☠️🔴 <@&1114525168904187934>")
 
 
+###   RUN K-A SERVER AND BOT   ###
 keep_alive()
 bot.run(TOKEN)
