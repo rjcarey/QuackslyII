@@ -625,4 +625,10 @@ async def pirates():
 
 ###   RUN K-A SERVER AND BOT   ###
 keep_alive()
-bot.run(TOKEN)
+while True:
+  try:
+    bot.run(TOKEN)
+  except Exception as e:
+    with open("error.txt", "a") as f:
+      f.write(e)
+  
