@@ -179,7 +179,7 @@ async def adminCommandList(ctx):
     await ctx.send(cmdList)
 
 @bot.command(name="createtextcommand", help="create custom text-response commands\n/createtextcommand [commandName] [response]", brief="Create a text response command")
-async def createtextcommand(ctx, command=commands.parameter(description="-> the name of the command (one word) followed by the text response")):
+async def createtextcommand(ctx, *, command=commands.parameter(description="-> the name of the command (one word) followed by the text response")):
     request = command.strip().split(' ', 1)
     command = request[0] if request[0][0] == "/" else "/" + request[0]
     response, passed = run_SQL(f'''INSERT INTO commands (request, response, creator, image) VALUES ('{command.lower()}', '{request[1]}', '{ctx.author.id}', 'F');''', False)
@@ -188,9 +188,9 @@ async def createtextcommand(ctx, command=commands.parameter(description="-> the 
     else:
         await ctx.send(str(response))
 
-@bot.command(name="createimagecommand", help="create custom text-response commands")
-async def createimagecommand(ctx, *, args):
-    request = args.strip().split()
+@bot.command(name="createimagecommand", help="create custom text-response commands\n/createimagecommand [commandName] [imageURL]", brief="Create an image response command")
+async def createimagecommand(ctx, *, command=commands.parameter(description="-> the name of the command (one word) followed by the url of the image response")):
+    request = command.strip().split()
     command = request[0] if request[0][0] == "/" else "/" + request[0]
     response, passed = run_SQL(f'''INSERT INTO commands (request, response, creator, image) VALUES ('{command.lower()}', '{request[1]}', '{ctx.author.id}', 'T');''', False)
     if passed:
@@ -198,9 +198,9 @@ async def createimagecommand(ctx, *, args):
     else:
         await ctx.send(str(response))
 
-@bot.command(name="joke", help="receive or add joke")
-async def joke(ctx, *args):
-    if not args:
+@bot.command(name="joke", help="receive or add a joke\n/joke\n/joke [joke]", brief="Returns or adds a joke")
+async def _joke(ctx, *, joke=commands.parameter(description="-> the joke to add to the repertoire")):
+    if not joke:
         response, passed = run_SQL("SELECT joke FROM jokes;", True)
         if passed:
             if not response:
@@ -210,16 +210,15 @@ async def joke(ctx, *args):
             else:
                 await ctx.send(response[randint(0, len(response) - 1)][0])
     else:
-        args = ' '.join(args)
-        response, passed = run_SQL(f"INSERT INTO jokes(joke) VALUES ('{args}');", False)
+        response, passed = run_SQL(f"INSERT INTO jokes(joke) VALUES ('{joke}');", False)
         if passed:
             await ctx.send("joke added")
     if not passed:
         await ctx.send(response)
 
-@bot.command(name="compliment", help="receive or add compliment")
-async def compliment(ctx, *args):
-    if not args:
+@bot.command(name="compliment", help="receive or add a compliment\n/compliment\n/compliment [compliment]", brief="Returns or adds a compliment")
+async def _compliment(ctx, *, compliment=commands.parameter(description="-> the compliment to add to the repertoire")):
+    if not compliment:
         response, passed = run_SQL("SELECT compliment FROM compliments;", True)
         if passed:
             if not response:
@@ -231,8 +230,7 @@ async def compliment(ctx, *args):
         else:
             await ctx.send(response)
     else:
-        args = ' '.join(args)
-        response, passed = run_SQL(f"INSERT INTO compliments(compliment) VALUES ('{args}');", False)
+        response, passed = run_SQL(f"INSERT INTO compliments(compliment) VALUES ('{compliment}');", False)
         if passed:
             await ctx.send("compliment added")
     if not passed:
@@ -535,6 +533,11 @@ async def uwufy(ctx, *, args):
 async def klausify(ctx, *args):
     await ctx.send('🤌🏼 ' + ' 🤌🏼 '.join(args) + ' 🤌🏼')
 
+@bot.command(name="test", brief="Temp test command", usage="this is the usage")
+async def test(ctx):
+    h = commands.DefaultHelpCommand()
+    s = h.get_command_signature(ctx.command)
+    await ctx.send(s)
 
 ###   LISTENERS   ###
 @bot.event
