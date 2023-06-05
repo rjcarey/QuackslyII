@@ -531,6 +531,10 @@ async def typofy(ctx, *, args):
 async def uwufy(ctx, *, args):
     await ctx.send(args.lower().replace('th', 't').replace('r', 'w').replace('u', 'uwu'))
 
+@bot.command(name="klausify", description="klausifies your message")
+async def klausify(ctx, *args):
+    await ctx.send('🤌🏼'.join(args))
+
 
 ###   LISTENERS   ###
 @bot.event
