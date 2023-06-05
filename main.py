@@ -91,32 +91,32 @@ async def passover(guild, m_id, member):
 
 
 ###   COMMANDS   ###
-@bot.command(name="echo", help="echoes your message back to you\n/echo [your message]", brief="Echoes your message")
-async def echo(ctx, *, Message=commands.parameter(description="-> the message you want to be echoed back")):
-    await ctx.send(Message)
+@bot.command(name="echo", help="echoes your message back to you\n/echo [message]", brief="Echoes your message")
+async def echo(ctx, *, message=commands.parameter(description="-> the message you want to be echoed back")):
+    await ctx.send(message)
 
-@bot.command(name="sql", help="admin command", hidden=True)
-async def sql(ctx, *, arg):
+@bot.command(name="sql", help="admin command\n/sql [sql statement]", brief="Runs some SQL", hidden=True)
+async def sql(ctx, *, statement=commands.parameter(description="-> the SQL statement you wish to run")):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
         return
     select = False
-    if arg.split()[0].upper() == "SELECT":
+    if statement.split()[0].upper() == "SELECT":
         select = True
-    response, passed = run_SQL(arg, select)
+    response, passed = run_SQL(statement, select)
     if passed and not select:
         response = "SQL executed"
     await ctx.send(response)
 
-@bot.command(name="rr", help="add an emote reaction to a message to give role", hidden=True)
-async def rr(ctx, messageID, _, emote):
+@bot.command(name="rr", help="add an emote reaction to a message to give role\n/rr [message ID] [@role] [emoji]", brief="Adds a reaction-role link to a message", hidden=True)
+async def rr(ctx, messageID=commands.parameter(description="-> the id of the message to add the link to"), role=commands.parameter(description="-> the role that the reaction gives"), emoji=commands.parameter(description="-> the emoji to react with to get the role")):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
     msg = await channel.fetch_message(messageID)
-    response, passed = run_SQL(f"INSERT INTO reactionroles(m_id, emote, r_id) VALUES({messageID}, '{emote}', {ctx.message.role_mentions[0].id});", False)
+    response, passed = run_SQL(f"INSERT INTO reactionroles(m_id, emote, r_id) VALUES({messageID}, '{emoji}', {ctx.message.role_mentions[0].id});", False)
     if not passed:
         await ctx.send(response)
         return
-    await msg.add_reaction(emote)
+    await msg.add_reaction(emoji)
     await ctx.send("reaction role added")
 
 @bot.command(name="drr", help="delete a reaction role", hidden=True)
