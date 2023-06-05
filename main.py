@@ -535,9 +535,10 @@ async def on_raw_reaction_remove(reaction):
 
 @bot.event
 async def on_message(msg):
-    try:
+    ctx = await bot.get_context(msg)
+    if ctx.valid:
         await bot.process_commands(msg)
-    except commands.CommandNotFound:
+    else:
         if msg.author.bot:
             return
         if msg.content == "@reboot all":
