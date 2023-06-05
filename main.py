@@ -178,8 +178,8 @@ async def adminCommandList(ctx):
             cmdList += f"\n{command.name}"
     await ctx.send(cmdList)
 
-@bot.command(name="createtextcommand", help="create custom text-response commands\n/createtextcommand [command] [response]", brief="Create a text response command")
-async def createtextcommand(ctx, *, command=commands.parameter(description="-> the name of the command (one word)\nresponse -> the response received when using the command")):
+@bot.command(name="createtextcommand", help="create custom text-response commands\n/createtextcommand [commandName] [response]", brief="Create a text response command")
+async def createtextcommand(ctx, command=commands.parameter(description="-> the name of the command (one word) followed by the text response")):
     request = command.strip().split(' ', 1)
     command = request[0] if request[0][0] == "/" else "/" + request[0]
     response, passed = run_SQL(f'''INSERT INTO commands (request, response, creator, image) VALUES ('{command.lower()}', '{request[1]}', '{ctx.author.id}', 'F');''', False)
