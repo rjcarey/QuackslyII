@@ -92,8 +92,8 @@ async def passover(guild, m_id, member):
 
 ###   COMMANDS   ###
 @bot.command(name="echo", description="The '/echo' command:>", help="echoes your message back to you", brief="Echoes your message")
-async def echo(ctx, *, YOURMESSAGE=commands.parameter(description="the text you want to be echoed back")):
-    await ctx.send(YOURMESSAGE)
+async def echo(ctx, *, Message=commands.parameter(description="-> the message you want to be echoed back")):
+    await ctx.send(Message)
 
 @bot.command(name="sql", help="admin command", hidden=True)
 async def sql(ctx, *, arg):
