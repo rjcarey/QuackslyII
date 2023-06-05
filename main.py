@@ -91,7 +91,7 @@ async def passover(guild, m_id, member):
 
 
 ###   COMMANDS   ###
-@bot.command(name="echo", description="echoes your message back to you")
+@bot.command(name="echo", description="echoes your message back to you", help="help", brief="brief", usage="usage")
 async def echo(ctx, *, arg):
     await ctx.send(arg)
 
