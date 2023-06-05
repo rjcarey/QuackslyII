@@ -13,7 +13,8 @@ from random import randint, random
 
 ###   BOT START   ###
 # translator = googletrans.Translator()
-bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
+help_command = commands.DefaultHelpCommand(show_parameter_descriptions=False)
+bot = commands.Bot(command_prefix='/', intents=discord.Intents.all(), help_command=help_command)
 @bot.event
 async def on_ready():
     bot_tasks = [change_status, events, dragon, parade_hunting_ball, pirates]
