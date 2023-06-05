@@ -95,7 +95,7 @@ async def passover(guild, m_id, member):
 async def echo(ctx, *, message=commands.parameter(description="-> the message you want to be echoed back")):
     await ctx.send(message)
 
-@bot.command(name="sql", help="admin command\n/sql [sql statement]", brief="Runs some SQL", hidden=True)
+@bot.command(name="sql", help="admin command used to run an sql statement\n/sql [sql statement]", brief="Runs some SQL", hidden=True)
 async def sql(ctx, *, statement=commands.parameter(description="-> the SQL statement you wish to run")):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
@@ -108,7 +108,7 @@ async def sql(ctx, *, statement=commands.parameter(description="-> the SQL state
         response = "SQL executed"
     await ctx.send(response)
 
-@bot.command(name="rr", help="add an emote reaction to a message to give role\n/rr [message ID] [@role] [emoji]", brief="Adds a reaction-role link to a message", hidden=True)
+@bot.command(name="rr", help="add an emoji reaction to a message to give role\n/rr [message ID] [@role] [emoji]", brief="Adds a reaction-role link to a message", hidden=True)
 async def rr(ctx, messageID=commands.parameter(description="-> the id of the message to add the link to"), role=commands.parameter(description="-> the role that the reaction gives"), emoji=commands.parameter(description="-> the emoji to react with to get the role")):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
     msg = await channel.fetch_message(messageID)
@@ -119,22 +119,22 @@ async def rr(ctx, messageID=commands.parameter(description="-> the id of the mes
     await msg.add_reaction(emoji)
     await ctx.send("reaction role added")
 
-@bot.command(name="drr", help="delete a reaction role", hidden=True)
-async def drr(ctx, messageID, emote):
+@bot.command(name="drr", help="delete a reaction-role link\n/drr [message ID] [emoji]", brief="Deletes a reaction-role link", hidden=True)
+async def drr(ctx, messageID=commands.parameter(description="-> the id of the message to delete the link from"), emoji=commands.parameter(description="the emoji of the link to delete")):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
     msg = await channel.fetch_message(messageID)
-    response, passed = run_SQL(f"DELETE FROM reactionroles WHERE m_id = {messageID} and emote = '{emote}';", False)
+    response, passed = run_SQL(f"DELETE FROM reactionroles WHERE m_id = {messageID} and emote = '{emoji}';", False)
     if not passed:
         await ctx.send(response)
         return
-    await msg.clear_reaction(emote)
+    await msg.clear_reaction(emoji)
     await ctx.send("reaction role deleted")
 
-@bot.command(name="changelog", help="find out about Quacksly's latest changes")
+@bot.command(name="changelog", help="find out about Quacksly's latest changes\n/changelog", brief="Returns latest changelog")
 async def changelog(ctx):
     ctx.send(CHANGELOG)
 
-@bot.command(name="initiate", help="join the ducknasty or update info")
+@bot.command(name="initiate", help="join the ducknasty or update info\n/initiate", brief="Join the Ducknasty")
 async def initiate(ctx):
     response, passed = run_SQL(f"SELECT * FROM members WHERE uid = '{ctx.author.id}';", True)
     if passed and not response:
@@ -151,7 +151,7 @@ async def initiate(ctx):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="?", help="list all possible commands")
+@bot.command(name="?", help="list all possible commands\n/?", brief="Returns simple list of all command names")
 async def commandList(ctx):
     cmdList = "commands:>"
     for command in bot.commands:
@@ -170,7 +170,7 @@ async def commandList(ctx):
     else:
         await ctx.send(str(response))
 
-@bot.command(name="admincommands", help="display list of admin commands")
+@bot.command(name="admincommands", help="display list of admin commands\n/admincommands", brief="Returns simple list of all admin command names")
 async def adminCommandList(ctx):
     cmdList = "commands:>"
     for command in bot.commands:
@@ -178,9 +178,9 @@ async def adminCommandList(ctx):
             cmdList += f"\n{command.name}"
     await ctx.send(cmdList)
 
-@bot.command(name="createtextcommand", help="create custom text-response commands")
-async def createtextcommand(ctx, *, args):
-    request = args.strip().split(' ', 1)
+@bot.command(name="createtextcommand", help="create custom text-response commands\n/createtextcommand [command] [response]", brief="Create a text response command")
+async def createtextcommand(ctx, *, command=commands.parameter(description="-> the name of the command (one word)\nresponse -> the response received when using the command")):
+    request = command.strip().split(' ', 1)
     command = request[0] if request[0][0] == "/" else "/" + request[0]
     response, passed = run_SQL(f'''INSERT INTO commands (request, response, creator, image) VALUES ('{command.lower()}', '{request[1]}', '{ctx.author.id}', 'F');''', False)
     if passed:
