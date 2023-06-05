@@ -512,9 +512,9 @@ async def logTypo(ctx, intent, typo):
     if passed and not response:
         response, passed = run_SQL(f'''INSERT INTO typos (intent, typo) VALUES ("{intent.lower()}", "{typo.lower()}");''', False)
         if passed:
-            ctx.send(f"logged {typo.lower()} as typo for {intent.lower()}")
+            await ctx.send(f"logged {typo.lower()} as typo for {intent.lower()}")
     if not passed:
-        ctx.send(str(response))
+        await ctx.send(str(response))
 
 @bot.command(name="typofy", description="convert you message into a piece of art")
 async def typofy(ctx, *, args):
@@ -523,9 +523,9 @@ async def typofy(ctx, *, args):
     if passed:
         for row in response:
             args = args.replace(row[0], row[1])
-        ctx.send(args)
+        await ctx.send(args)
     else:
-        ctx.send(str(response))
+        await ctx.send(str(response))
 
 
 ###   LISTENERS   ###
