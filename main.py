@@ -13,7 +13,7 @@ from random import randint, random
 
 ###   BOT START   ###
 # translator = googletrans.Translator()
-bot = commands.Bot(command_prefix='/', intents=discord.Intents.all(), help_command=None)
+bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 @bot.event
 async def on_ready():
     bot_tasks = [change_status, events, dragon, parade_hunting_ball, pirates]
@@ -91,10 +91,6 @@ async def passover(guild, m_id, member):
 
 
 ###   COMMANDS   ###
-@bot.command(name="snc", description="set channel as target for notifications", hidden=True)
-async def snc(ctx):
-    await ctx.send('set notification channel')
-
 @bot.command(name="echo", description="echoes your message back to you")
 async def echo(ctx, *, arg):
     await ctx.send(arg)
@@ -539,20 +535,20 @@ async def on_raw_reaction_remove(reaction):
 
 @bot.event
 async def on_message(msg):
+    await bot.process_commands(msg)
     if msg.author.bot:
         return
-    else:
-        if msg.content == "@reboot all":
-          if not await bot.is_owner(msg.author):
+    if msg.content == "@reboot all":
+        if not await bot.is_owner(msg.author):
             await msg.channel.send("you do not have permission to use this command")
-          else:
+        else:
             for table in SCHEMAS:
                 response, passed = run_SQL(SCHEMAS[table], False)
                 if not passed:
                     await msg.channel.send(str(response))
                 else:
                     await msg.channel.send(f"{table} created")
-          return
+        return
     if msg.content[0] == '/':
         # if msg.content[1:3] in googletrans.LANGUAGES.keys():
             # txt = f"{msg.author.name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
