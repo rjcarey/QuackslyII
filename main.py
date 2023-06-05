@@ -138,14 +138,14 @@ async def changelog(ctx):
 async def initiate(ctx):
     response, passed = run_SQL(f"SELECT * FROM members WHERE uid = '{ctx.author.id}';", True)
     if passed and not response:
-        response, passed = run_SQL(f"INSERT INTO members VALUES ('{ctx.author.id}', '{ctx.author.name}', 100, '{date.today()}', 'T');", False)
+        response, passed = run_SQL(f"INSERT INTO members VALUES ('{ctx.author.id}', '{ctx.author.display_name}', 100, '{date.today()}', 'T', '');", False)
         if passed:
             await ctx.send("welcome to the ducknasty")
     elif passed:
-        if response[0][1] == ctx.author.name:
+        if response[0][1] == ctx.author.display_name:
             await ctx.send("you have already been initialised")
         else:
-            response, passed = run_SQL(f"UPDATE members SET username = '{ctx.author.name}' WHERE uid = '{ctx.author.id}';", False)
+            response, passed = run_SQL(f"UPDATE members SET username = '{ctx.author.display_name}' WHERE uid = '{ctx.author.id}';", False)
             if passed:
                 await ctx.send("username updated")
     if not passed:
@@ -554,12 +554,12 @@ async def on_message(msg):
             return
         if msg.content[0] == '/':
             # if msg.content[1:3] in googletrans.LANGUAGES.keys():
-                # txt = f"{msg.author.name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
+                # txt = f"{msg.author.display_name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
                 # await msg.channel.send(txt)
             # else:
             await custom_command(msg.channel, msg.author.id, msg.content)
         else:
-            await passover(msg.guild, msg.author.id, msg.author.name)
+            await passover(msg.guild, msg.author.id, msg.author.display_name)
 
 
 ###   LOOPS   ###
