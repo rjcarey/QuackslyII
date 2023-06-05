@@ -516,7 +516,7 @@ async def logTypo(ctx, intent, typo):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="typofy", description="convert you message into a piece of art")
+@bot.command(name="typofy", description="convert your message into a piece of art")
 async def typofy(ctx, *, args):
     args = args.lower()
     response, passed = run_SQL("SELECT intent, typo FROM typos;", True)
@@ -526,6 +526,10 @@ async def typofy(ctx, *, args):
         await ctx.send(args)
     else:
         await ctx.send(str(response))
+
+@bot.command(name="uwufy", description="convert your message into a adorableness")
+async def uwufy(ctx, *, args):
+    await ctx.send(args.lower().replace('th', 't').replace('r', 'w').replace('u', 'uwu'))
 
 
 ###   LISTENERS   ###
