@@ -533,7 +533,7 @@ async def uwufy(ctx, *, args):
 
 @bot.command(name="klausify", description="klausifies your message")
 async def klausify(ctx, *args):
-    await ctx.send('🤌🏼'.join(args))
+    await ctx.send('🤌🏼 ' + ' 🤌🏼 '.join(args) + ' 🤌🏼')
 
 
 ###   LISTENERS   ###
