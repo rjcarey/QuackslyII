@@ -454,23 +454,26 @@ async def negKick(ctx, *, player=None):
 
 @bot.command(name="ball", description="check or update ball habits")
 async def ball(ctx, *args):
-    response, passed = run_SQL(f"SELECT compliment, insult FROM ball WHERE username = '{args[0].lower()}';", True)
-    if passed and len(args) == 1:
-        if not response:
-            await ctx.send(f"no record for {args[0].lower()}")
-        else:
-            await ctx.send(f"{args[0].lower()}'s record: {response[0][0]} compliments and {response[0][1]} insults")
-    elif passed and len(args) == 3:
-        if not response:
-            response, passed = run_SQL(f"INSERT INTO ball (username, compliment, insult) VALUES ('{args[0].lower()}', {args[1]}, {args[2]});", False)
-        else:
-            response, passed = run_SQL(f"UPDATE ball SET compliment = {int(args[1]) + int(response[0][0])}, insult = {int(args[2]) + int(response[0][1])} WHERE username = '{args[0].lower()}';", False)
-        if passed:
-            await ctx.send(f"added {args[1]} compliment/s and {args[2]} insult/s to {args[0].lower()}")
-    elif passed:
-        await ctx.send("incorrect syntax; /ball [name] or /ball [name] [num compliments] [num insults]")
-    if not passed:
-        await ctx.send(str(response))
+    if args:
+        response, passed = run_SQL(f"SELECT compliment, insult FROM ball WHERE username = '{args[0].lower()}';", True)
+        if passed and len(args) == 1:
+            if not response:
+                await ctx.send(f"no record for {args[0].lower()}")
+            else:
+                await ctx.send(f"{args[0].lower()}'s record: {response[0][0]} compliments and {response[0][1]} insults")
+        elif passed and len(args) == 3:
+            if not response:
+                response, passed = run_SQL(f"INSERT INTO ball (username, compliment, insult) VALUES ('{args[0].lower()}', {args[1]}, {args[2]});", False)
+            else:
+                response, passed = run_SQL(f"UPDATE ball SET compliment = {int(args[1]) + int(response[0][0])}, insult = {int(args[2]) + int(response[0][1])} WHERE username = '{args[0].lower()}';", False)
+            if passed:
+                await ctx.send(f"added {args[1]} compliment/s and {args[2]} insult/s to {args[0].lower()}")
+        elif passed:
+            await ctx.send("incorrect syntax; /ball [name] or /ball [name] [num compliments] [num insults]")
+        if not passed:
+            await ctx.send(str(response))
+    else:
+        ctx.send("ball syntax: /ball [playername] or /ball [playername] [compliments] [insults]")
 
 @bot.command(name="imagetest", description="test if an image link works")
 async def imageTest(ctx, image):
