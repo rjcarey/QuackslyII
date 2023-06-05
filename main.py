@@ -535,28 +535,30 @@ async def on_raw_reaction_remove(reaction):
 
 @bot.event
 async def on_message(msg):
-    await bot.process_commands(msg)
-    if msg.author.bot:
-        return
-    if msg.content == "@reboot all":
-        if not await bot.is_owner(msg.author):
-            await msg.channel.send("you do not have permission to use this command")
+    try:
+        await bot.process_commands(msg)
+    except commands.CommandNotFound:
+        if msg.author.bot:
+            return
+        if msg.content == "@reboot all":
+            if not await bot.is_owner(msg.author):
+                await msg.channel.send("you do not have permission to use this command")
+            else:
+                for table in SCHEMAS:
+                    response, passed = run_SQL(SCHEMAS[table], False)
+                    if not passed:
+                        await msg.channel.send(str(response))
+                    else:
+                        await msg.channel.send(f"{table} created")
+            return
+        if msg.content[0] == '/':
+            # if msg.content[1:3] in googletrans.LANGUAGES.keys():
+                # txt = f"{msg.author.name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
+                # await msg.channel.send(txt)
+            # else:
+            await custom_command(msg.channel, msg.author.id, msg.content)
         else:
-            for table in SCHEMAS:
-                response, passed = run_SQL(SCHEMAS[table], False)
-                if not passed:
-                    await msg.channel.send(str(response))
-                else:
-                    await msg.channel.send(f"{table} created")
-        return
-    if msg.content[0] == '/':
-        # if msg.content[1:3] in googletrans.LANGUAGES.keys():
-            # txt = f"{msg.author.name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
-            # await msg.channel.send(txt)
-        # else:
-        await custom_command(msg.channel, msg.author.id, msg.content)
-    else:
-        await passover(msg.guild, msg.author.id, msg.author.name)
+            await passover(msg.guild, msg.author.id, msg.author.name)
 
 
 ###   LOOPS   ###
