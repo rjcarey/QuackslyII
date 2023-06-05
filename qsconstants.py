@@ -21,5 +21,6 @@ SCHEMAS = {
     "cf": "CREATE TABLE cf (name TEXT PRIMARY KEY NOT NULL UNIQUE, creator TEXT NOT NULL, bet TEXT NOT NULL, choice TEXT NOT NULL);",
     "neg": "CREATE TABLE neg (kicker TEXT PRIMARY KEY NOT NULL UNIQUE, lastkicked TEXT NOT NULL);",
     "bot": "CREATE TABLE bot (request TEXT PRIMARY KEY NOT NULL UNIQUE, response TEXT, image TEXT, paymin INTEGER, paymax INTEGER, cooldown INTEGER, lastused INTEGER, negresponse TEXT, bad TEXT);",
-    "shop": "CREATE TABLE shop (item TEXT PRIMARY KEY NOT NULL UNIQUE, description TEXT, price INTEGER);"
+    "shop": "CREATE TABLE shop (item TEXT PRIMARY KEY NOT NULL UNIQUE, description TEXT, price INTEGER);",
+    "typos": "CREATE TABLE typos (intent TEXT PRIMARY KEY NOT NULL, typo TEXT NOT NULL);"
 }

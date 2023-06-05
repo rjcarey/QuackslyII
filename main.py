@@ -503,6 +503,27 @@ async def reload(ctx, *, args):
     else:
         await ctx.send(f"values loaded into {args[0]}")
 
+@bot.command(name="typo", description="log a typo")
+async def logTypo(ctx, intent, typo):
+    response, passed = run_SQL(f'''SELECT intent FROM typos WHERE intent = "{intent.lower()}";''', True)
+    if passed and not response:
+        response, passed = run_SQL(f'''INSERT INTO typos (intent, typo) VALUES ("{intent.lower()}", "{typo.lower()}");''', False)
+        if passed:
+            ctx.send(f"logged {typo.lower()} as typo for {intent.lower()}")
+    if not passed:
+        ctx.send(str(response))
+
+@bot.command(name="typofy", description="convert you message into a piece of art")
+async def typofy(ctx, *, args):
+    args = args.lower()
+    response, passed = run_SQL("SELECT intent, typo FROM typos;", True)
+    if passed:
+        for row in response:
+            args = args.replace(row[0], row[1])
+        ctx.send(args)
+    else:
+        ctx.send(str(response))
+
 
 ###   LISTENERS   ###
 @bot.event
