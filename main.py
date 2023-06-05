@@ -285,7 +285,7 @@ async def coinflip(ctx, *args):
                 if passed and not response:
                     await ctx.send("no game found")
                 elif passed:
-                    bet = int(response[0])
+                    bet = int(response[0][0])
                     response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{ctx.author.id}';", True)
                     if passed:
                         response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + bet} WHERE uid = '{ctx.author.id}';", False)
