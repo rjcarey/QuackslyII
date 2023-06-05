@@ -539,6 +539,20 @@ async def on_raw_reaction_remove(reaction):
 
 @bot.event
 async def on_message(msg):
+    if msg.author.bot:
+        return
+    else:
+        if msg.content == "@reboot all":
+          if not await bot.is_owner(msg.author):
+            await msg.channel.send("you do not have permission to use this command")
+          else:
+            for table in SCHEMAS:
+                response, passed = run_SQL(SCHEMAS[table], False)
+                if not passed:
+                    await msg.channel.send(str(response))
+                else:
+                    await msg.channel.send(f"{table} created")
+          return
     if msg.content[0] == '/':
         # if msg.content[1:3] in googletrans.LANGUAGES.keys():
             # txt = f"{msg.author.name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
