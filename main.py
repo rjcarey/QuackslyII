@@ -91,11 +91,11 @@ async def passover(guild, m_id, member):
 
 
 ###   COMMANDS   ###
-@bot.command(name="echo", description="echoes your message back to you", help="help", brief="brief", usage="usage")
-async def echo(ctx, *, arg):
-    await ctx.send(arg)
+@bot.command(name="echo", description="The '/echo' command", help="echoes your message back to you", brief="Echoes your message", usage="this is how to use echo")
+async def echo(ctx, *, args=commands.Parameter(name="YourMessage", description="The text you want to be echoed back", kind=commands.Parameter.POSITIONAL_OR_KEYWORD)):
+    await ctx.send(args)
 
-@bot.command(name="sql", description="admin command", hidden=True)
+@bot.command(name="sql", help="admin command", hidden=True)
 async def sql(ctx, *, arg):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
@@ -108,7 +108,7 @@ async def sql(ctx, *, arg):
         response = "SQL executed"
     await ctx.send(response)
 
-@bot.command(name="rr", description="add an emote reaction to a message to give role", hidden=True)
+@bot.command(name="rr", help="add an emote reaction to a message to give role", hidden=True)
 async def rr(ctx, messageID, _, emote):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
     msg = await channel.fetch_message(messageID)
@@ -119,7 +119,7 @@ async def rr(ctx, messageID, _, emote):
     await msg.add_reaction(emote)
     await ctx.send("reaction role added")
 
-@bot.command(name="drr", description="delete a reaction role", hidden=True)
+@bot.command(name="drr", help="delete a reaction role", hidden=True)
 async def drr(ctx, messageID, emote):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
     msg = await channel.fetch_message(messageID)
@@ -130,11 +130,11 @@ async def drr(ctx, messageID, emote):
     await msg.clear_reaction(emote)
     await ctx.send("reaction role deleted")
 
-@bot.command(name="changelog", description="find out about Quacksly's latest changes")
+@bot.command(name="changelog", help="find out about Quacksly's latest changes")
 async def changelog(ctx):
     ctx.send(CHANGELOG)
 
-@bot.command(name="initiate", description="join the ducknasty or update info")
+@bot.command(name="initiate", help="join the ducknasty or update info")
 async def initiate(ctx):
     response, passed = run_SQL(f"SELECT * FROM members WHERE uid = '{ctx.author.id}';", True)
     if passed and not response:
@@ -151,7 +151,7 @@ async def initiate(ctx):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="?", description="list all possible commands")
+@bot.command(name="?", help="list all possible commands")
 async def commandList(ctx):
     cmdList = "commands:>"
     for command in bot.commands:
@@ -170,7 +170,7 @@ async def commandList(ctx):
     else:
         await ctx.send(str(response))
 
-@bot.command(name="admincommands", description="display list of admin commands")
+@bot.command(name="admincommands", help="display list of admin commands")
 async def adminCommandList(ctx):
     cmdList = "commands:>"
     for command in bot.commands:
@@ -178,7 +178,7 @@ async def adminCommandList(ctx):
             cmdList += f"\n{command.name}"
     await ctx.send(cmdList)
 
-@bot.command(name="createtextcommand", description="create custom text-response commands")
+@bot.command(name="createtextcommand", help="create custom text-response commands")
 async def createtextcommand(ctx, *, args):
     request = args.strip().split(' ', 1)
     command = request[0] if request[0][0] == "/" else "/" + request[0]
@@ -188,7 +188,7 @@ async def createtextcommand(ctx, *, args):
     else:
         await ctx.send(str(response))
 
-@bot.command(name="createimagecommand", description="create custom text-response commands")
+@bot.command(name="createimagecommand", help="create custom text-response commands")
 async def createimagecommand(ctx, *, args):
     request = args.strip().split()
     command = request[0] if request[0][0] == "/" else "/" + request[0]
@@ -198,7 +198,7 @@ async def createimagecommand(ctx, *, args):
     else:
         await ctx.send(str(response))
 
-@bot.command(name="joke", description="receive or add joke")
+@bot.command(name="joke", help="receive or add joke")
 async def joke(ctx, *args):
     if not args:
         response, passed = run_SQL("SELECT joke FROM jokes;", True)
@@ -217,7 +217,7 @@ async def joke(ctx, *args):
     if not passed:
         await ctx.send(response)
 
-@bot.command(name="compliment", description="receive or add compliment")
+@bot.command(name="compliment", help="receive or add compliment")
 async def compliment(ctx, *args):
     if not args:
         response, passed = run_SQL("SELECT compliment FROM compliments;", True)
@@ -238,7 +238,7 @@ async def compliment(ctx, *args):
     if not passed:
         await ctx.send(response)
 
-@bot.command(name="cf", description="coinflip command")
+@bot.command(name="cf", help="coinflip command")
 async def coinflip(ctx, *args):
     passed, response = True, ""
     if not args:
@@ -316,7 +316,7 @@ async def coinflip(ctx, *args):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="give", description="give coins to another user")
+@bot.command(name="give", help="give coins to another user")
 async def give(ctx, user: discord.Member, amount: int):
     response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{user.id}';", True)
     if passed and not response:
@@ -341,7 +341,7 @@ async def give(ctx, user: discord.Member, amount: int):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="inject", description="add coins to user from void", hidden=True)
+@bot.command(name="inject", help="add coins to user from void", hidden=True)
 async def inject(ctx, user: discord.Member, amount: int):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
@@ -355,7 +355,7 @@ async def inject(ctx, user: discord.Member, amount: int):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="bank", description="check how many coins you have")
+@bot.command(name="bank", help="check how many coins you have")
 async def bank(ctx, user: discord.Member = None):
     if user:
         response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{user.id}';", True)
@@ -372,7 +372,7 @@ async def bank(ctx, user: discord.Member = None):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="shop", description="view items in the shop or buy an item")
+@bot.command(name="shop", help="view items in the shop or buy an item")
 async def shop(ctx, item=None):
     if not item:
         response, passed = run_SQL("SELECT item, description, price FROM shop;", True)
@@ -407,7 +407,7 @@ async def shop(ctx, item=None):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="additem", description="add item to shop", hidden=True)
+@bot.command(name="additem", help="add item to shop", hidden=True)
 async def addItem(ctx, *, args):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
@@ -418,7 +418,7 @@ async def addItem(ctx, *, args):
     else:
         await ctx.send(str(response))
 
-@bot.command(name="list", description="view all record of a table", hidden=True)
+@bot.command(name="list", help="view all record of a table", hidden=True)
 async def listTable(ctx, table):
     response, passed = run_SQL(f"SELECT * FROM {table};", True)
     if not passed:
@@ -429,7 +429,7 @@ async def listTable(ctx, table):
             msg += f"\n{record}"
         await ctx.send(msg)
 
-@bot.command(name="negkick", description="check recent kicks or add a new one")
+@bot.command(name="negkick", help="check recent kicks or add a new one")
 async def negKick(ctx, *, player=None):
     if not player:
         response, passed = run_SQL("SELECT kicker, lastkicked FROM neg;", True)
@@ -452,7 +452,7 @@ async def negKick(ctx, *, player=None):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="ball", description="check or update ball habits")
+@bot.command(name="ball", help="check or update ball habits")
 async def ball(ctx, *args):
     if args:
         response, passed = run_SQL(f"SELECT compliment, insult FROM ball WHERE username = '{args[0].lower()}';", True)
@@ -475,11 +475,11 @@ async def ball(ctx, *args):
     else:
         ctx.send("ball syntax: /ball [playername] or /ball [playername] [compliments] [insults]")
 
-@bot.command(name="imagetest", description="test if an image link works")
+@bot.command(name="imagetest", help="test if an image link works")
 async def imageTest(ctx, image):
     await ctx.send(file=discord.File(image))
 
-@bot.command(name="reboot", description="reboot database table", hidden=True)
+@bot.command(name="reboot", help="reboot database table", hidden=True)
 async def reboot(ctx, table):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
@@ -495,7 +495,7 @@ async def reboot(ctx, table):
     else:
         await ctx.send(str(response))
 
-@bot.command(name="reload", description="reload data into database table", hidden=True)
+@bot.command(name="reload", help="reload data into database table", hidden=True)
 async def reload(ctx, *, args):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
@@ -506,7 +506,7 @@ async def reload(ctx, *, args):
     else:
         await ctx.send(f"values loaded into {args[0]}")
 
-@bot.command(name="typo", description="log a typo")
+@bot.command(name="typo", help="log a typo")
 async def logTypo(ctx, intent, typo):
     response, passed = run_SQL(f'''SELECT intent FROM typos WHERE intent = "{intent.lower()}";''', True)
     if passed and not response:
@@ -516,7 +516,7 @@ async def logTypo(ctx, intent, typo):
     if not passed:
         await ctx.send(str(response))
 
-@bot.command(name="typofy", description="convert your message into a piece of art")
+@bot.command(name="typofy", help="convert your message into a piece of art")
 async def typofy(ctx, *, args):
     args = args.lower()
     response, passed = run_SQL("SELECT intent, typo FROM typos;", True)
@@ -527,11 +527,11 @@ async def typofy(ctx, *, args):
     else:
         await ctx.send(str(response))
 
-@bot.command(name="uwufy", description="convert your message into a adorableness")
+@bot.command(name="uwufy", help="convert your message into a adorableness")
 async def uwufy(ctx, *, args):
     await ctx.send(args.lower().replace('th', 't').replace('r', 'w').replace('u', 'uwu'))
 
-@bot.command(name="klausify", description="klausifies your message")
+@bot.command(name="klausify", help="klausifies your message")
 async def klausify(ctx, *args):
     await ctx.send('🤌🏼 ' + ' 🤌🏼 '.join(args) + ' 🤌🏼')
 
