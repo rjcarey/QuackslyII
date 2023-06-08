@@ -7,9 +7,8 @@ import sqlite3
 from qsconstants import TOKEN, AUTOROLE_CID, NOTIF_CID, LOG_CID, DATABASE, SCHEMAS, status, CHANGELOG
 from keepalive import keep_alive
 from random import randint, random
-#import pkg_resources
-#pkg_resources.require("googletrans==4.0.0-rc1")
 import googletrans
+
 
 ###   BOT START   ###
 translator = googletrans.Translator()
@@ -626,9 +625,8 @@ async def pirates():
 ###   RUN K-A SERVER AND BOT   ###
 keep_alive()
 while True:
-  try:
-    bot.run(TOKEN)
-  except Exception as e:
-    with open("error.txt", "a") as f:
-      f.write(e)
-  
+    try:
+        bot.run(TOKEN)
+    except Exception as error:
+        with open("error.txt", "a") as f:
+            f.write(str(error))
