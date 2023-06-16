@@ -469,7 +469,10 @@ async def ball(ctx, *args):
 
 @bot.command(name="imagetest", help="test if an image link works")
 async def imageTest(ctx, image):
-    await ctx.send(file=discord.File(image))
+    try:
+        await ctx.send(file=discord.File(image))
+    except FileNotFoundError:
+        await ctx.send(f"file not found (path: {image})")
 
 @bot.command(name="reboot", help="reboot database table", hidden=True)
 async def reboot(ctx, table):
