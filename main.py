@@ -55,7 +55,7 @@ async def custom_command(channel, m_id, request):
                 await channel.send(response[0][0])
     elif passed:
         r_cmd, r_res, r_img, r_pmin, r_pmax, r_cd, r_lu, r_nr, r_bad = response[0]
-        response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{m_id}';", True)
+        response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {m_id};", True)
         if passed and not response:
             return await channel.send("you have not joined the ducknasty yet (/initiate)")
         elif passed:
@@ -64,7 +64,7 @@ async def custom_command(channel, m_id, request):
                 await channel.send(r_nr)
             else:
                 payout = randint(r_pmin, r_pmax) if r_bad == 'F' else -randint(r_pmin, r_pmax)
-                response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + payout} WHERE uid = '{m_id}';", False)
+                response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + payout} WHERE m_id = {m_id};", False)
                 if passed:
                     response, passed = run_SQL(f"UPDATE bot SET lastused = {usetime} WHERE request = '{r_cmd}';", False)
                     if passed:
@@ -79,10 +79,10 @@ async def custom_command(channel, m_id, request):
 
 async def passover(guild, m_id, member):
     channel = await guild.fetch_channel(LOG_CID)
-    response, passed = run_SQL(f"SELECT money, daily FROM members WHERE uid = '{m_id}';", True)
+    response, passed = run_SQL(f"SELECT money, daily FROM members WHERE m_id = {m_id};", True)
     if response and passed:
         if str(date.today()) != str(response[0][1]):
-            response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + 50}, daily = '{date.today()}' WHERE uid = '{m_id}';", False)
+            response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + 50}, daily = '{date.today()}' WHERE m_id = {m_id};", False)
             if not passed:
                 await channel.send(str(response))
             await channel.send(f"{member} claimed 50 daily coins")
@@ -112,7 +112,7 @@ async def sql(ctx, *, statement=commands.parameter(description="-> the SQL state
 async def rr(ctx, messageID=commands.parameter(description="-> the id of the message to add the link to"), role=commands.parameter(description="-> the role that the reaction gives"), emoji=commands.parameter(description="-> the emoji to react with to get the role")):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
     msg = await channel.fetch_message(messageID)
-    response, passed = run_SQL(f"INSERT INTO reactionroles(m_id, emote, r_id) VALUES({messageID}, '{emoji}', {ctx.message.role_mentions[0].id});", False)
+    response, passed = run_SQL(f"INSERT INTO reactionroles(msg_id, emote, r_id) VALUES({messageID}, '{emoji}', {ctx.message.role_mentions[0].id});", False)
     if not passed:
         await ctx.send(response)
         return
@@ -123,7 +123,7 @@ async def rr(ctx, messageID=commands.parameter(description="-> the id of the mes
 async def drr(ctx, messageID=commands.parameter(description="-> the id of the message to delete the link from"), emoji=commands.parameter(description="the emoji of the link to delete")):
     channel = await ctx.guild.fetch_channel(AUTOROLE_CID)
     msg = await channel.fetch_message(messageID)
-    response, passed = run_SQL(f"DELETE FROM reactionroles WHERE m_id = {messageID} and emote = '{emoji}';", False)
+    response, passed = run_SQL(f"DELETE FROM reactionroles WHERE msg_id = {messageID} and emote = '{emoji}';", False)
     if not passed:
         await ctx.send(response)
         return
@@ -136,18 +136,13 @@ async def changelog(ctx):
 
 @bot.command(name="initiate", help="join the ducknasty or update info\n/initiate", brief="Join the Ducknasty")
 async def initiate(ctx):
-    response, passed = run_SQL(f"SELECT * FROM members WHERE uid = '{ctx.author.id}';", True)
+    response, passed = run_SQL(f"SELECT * FROM members WHERE m_id = {ctx.author.id};", True)
     if passed and not response:
-        response, passed = run_SQL(f"INSERT INTO members VALUES ('{ctx.author.id}', '{ctx.author.display_name}', 100, '{date.today()}', 'T', '');", False)
+        response, passed = run_SQL(f"INSERT INTO members VALUES ({ctx.author.id}, 100, '{date.today()}', '');", False)
         if passed:
             await ctx.send("welcome to the ducknasty")
     elif passed:
-        if response[0][1] == ctx.author.display_name:
-            await ctx.send("you have already been initialised")
-        else:
-            response, passed = run_SQL(f"UPDATE members SET username = '{ctx.author.display_name}' WHERE uid = '{ctx.author.id}';", False)
-            if passed:
-                await ctx.send("username updated")
+        await ctx.send("you have already been initialised")
     if not passed:
         await ctx.send(str(response))
 
@@ -182,7 +177,7 @@ async def adminCommandList(ctx):
 async def createtextcommand(ctx, *, command=commands.parameter(description="-> the name of the command (one word) followed by the text response")):
     request = command.strip().split(' ', 1)
     command = request[0] if request[0][0] == "/" else "/" + request[0]
-    response, passed = run_SQL(f'''INSERT INTO commands (request, response, creator, image) VALUES ('{command.lower()}', '{request[1]}', '{ctx.author.id}', 'F');''', False)
+    response, passed = run_SQL(f'''INSERT INTO commands (request, response, creator_id, image) VALUES ('{command.lower()}', '{request[1]}', {ctx.author.id}, 'F');''', False)
     if passed:
         await ctx.send(f"command created ({command.lower()})")
     else:
@@ -192,7 +187,7 @@ async def createtextcommand(ctx, *, command=commands.parameter(description="-> t
 async def createimagecommand(ctx, *, command=commands.parameter(description="-> the name of the command (one word) followed by the url of the image response")):
     request = command.strip().split()
     command = request[0] if request[0][0] == "/" else "/" + request[0]
-    response, passed = run_SQL(f'''INSERT INTO commands (request, response, creator, image) VALUES ('{command.lower()}', '{request[1]}', '{ctx.author.id}', 'T');''', False)
+    response, passed = run_SQL(f'''INSERT INTO commands (request, response, creator_id, image) VALUES ('{command.lower()}', '{request[1]}', {ctx.author.id}, 'T');''', False)
     if passed:
         await ctx.send(f"command created ({command.lower()})")
     else:
@@ -250,57 +245,56 @@ async def coinflip(ctx, *args):
             await ctx.send("there are currently no bets")
     else:
         if args[0] == "join":
-            response, passed = run_SQL(f"SELECT uid, username, money FROM members WHERE uid = '{ctx.author.id}';", True)
+            response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {ctx.author.id};", True)
             if passed and not response:
                 await ctx.send("you have not joined the ducknasty yet (/initiate)")
             elif passed:
-                j_uid, j_un, j_money = response[0]
-                response, passed = run_SQL(f"SELECT creator, bet, choice FROM cf WHERE name = '{args[1]}';", True)
+                response, passed = run_SQL(f"SELECT creator_id, bet, choice FROM cf WHERE name = '{args[1]}';", True)
                 if passed and not response:
                     await ctx.send(f"game not found ({args[1]})")
                 elif passed:
-                    uid, bet, choice = response[0][0], int(response[0][1]), response[0][2]
-                    if bet <= int(j_money):
-                        response, passed = run_SQL(f"UPDATE members SET money = {int(j_money) - bet} WHERE uid = '{ctx.author.id}';", False)
+                    m_id, bet, choice = response[0][0], int(response[0][1]), response[0][2]
+                    if bet <= int(response[0][0]):
+                        response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) - bet} WHERE m_id = {ctx.author.id};", False)
                         if passed:
                             flip = ["heads", "head", "h"] if random() < 0.5 else ["tails", "tail", "t"]
-                            winner = uid if choice in flip else ctx.author.id
-                            response, passed = run_SQL(f"SELECT uid, username, money FROM members WHERE uid = '{winner}';", True)
+                            winner = m_id if choice in flip else ctx.author.id
+                            response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {winner};", True)
                             if passed:
-                                win, currentMoney, name = int(bet * 2), int(response[0][2]), response[0][1]
-                                response, passed = run_SQL(f"UPDATE members SET money = {currentMoney + win} WHERE uid = '{winner}';", False)
+                                response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + int(bet * 2)} WHERE m_id = {winner};", False)
                                 if passed:
                                     response, passed = run_SQL(f"DELETE FROM cf WHERE name = '{args[1]}';", False)
                                     if passed:
-                                        await ctx.send(f"{flip[0]}, {name} wins {win} coins")
+                                        member = await ctx.guild.fetch_member(winner)
+                                        await ctx.send(f"{flip[0]}, {member.nick} wins {int(bet * 2)} coins")
                     else:
                         await ctx.send("you do not have enough coins for this bet")
         elif args[0] == "cancel":
             if len(args) != 2:
                 await ctx.send("incorrect syntax: /cf cancel name")
             else:
-                response, passed = run_SQL(f"SELECT bet FROM cf WHERE name = '{args[1]}' AND creator = '{ctx.author.id}';", True)
+                response, passed = run_SQL(f"SELECT bet FROM cf WHERE name = '{args[1]}' AND creator_id = {ctx.author.id};", True)
                 if passed and not response:
                     await ctx.send("no game found")
                 elif passed:
                     bet = int(response[0][0])
-                    response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{ctx.author.id}';", True)
+                    response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {ctx.author.id};", True)
                     if passed:
-                        response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + bet} WHERE uid = '{ctx.author.id}';", False)
+                        response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + bet} WHERE m_id = {ctx.author.id};", False)
                         if passed:
-                            response, passed = run_SQL(f"DELETE FROM cf WHERE name = '{args[1]}' AND creator = '{ctx.author.id}';", False)
+                            response, passed = run_SQL(f"DELETE FROM cf WHERE name = '{args[1]}' AND creator_id = {ctx.author.id};", False)
                             if passed:
                                 await ctx.send("bet canceled")
         elif len(args) == 3:
             response, passed = run_SQL(f"SELECT name FROM cf WHERE name = '{args[0]}';", True)
             if passed and not response:
-                response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{ctx.author.id}';", True)
+                response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {ctx.author.id};", True)
                 if passed and not response:
                     await ctx.send("you have not joined the ducknasty yet (/initiate)")
                 elif passed:
                     if args[2] in ["heads", "head", "h", "tails", "tail", "t"]:
                         if int(response[0][0]) >= int(args[1]) >= 0:
-                            response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) - int(args[1])} WHERE uid = '{ctx.author.id}';", False)
+                            response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) - int(args[1])} WHERE m_id = {ctx.author.id};", False)
                             if passed:
                                 response, passed = run_SQL(f"INSERT INTO cf VALUES ('{args[0]}', '{ctx.author.id}', '{args[1]}','{args[2]}');", False)
                                 if passed:
@@ -316,12 +310,12 @@ async def coinflip(ctx, *args):
 
 @bot.command(name="give", help="give coins to another user")
 async def give(ctx, user: discord.Member, amount: int):
-    response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{user.id}';", True)
+    response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {user.id};", True)
     if passed and not response:
-        await ctx.send("either they have not joined the ducknasty, or have since changed their username")
+        await ctx.send("they have not joined the ducknasty (/initiate)")
     elif passed:
         payee = response[0]
-        response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{ctx.author.id}';", True)
+        response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {ctx.author.id};", True)
         if passed and not response:
             await ctx.send("you have not joined the ducknasty yet (/initiate)")
         elif passed:
@@ -331,11 +325,11 @@ async def give(ctx, user: discord.Member, amount: int):
             elif amount > int(payer[0]):
                 await ctx.send("you do not have enough coins to give this")
             else:
-                response, passed = run_SQL(f"UPDATE members SET money = {int(payer[0]) - amount} WHERE uid = '{ctx.author.id}';", False)
+                response, passed = run_SQL(f"UPDATE members SET money = {int(payer[0]) - amount} WHERE m_id = {ctx.author.id};", False)
                 if passed:
-                    response, passed = run_SQL(f"UPDATE members SET money = {int(payee[0]) + amount} WHERE uid = '{user.id}';", False)
+                    response, passed = run_SQL(f"UPDATE members SET money = {int(payee[0]) + amount} WHERE m_id = {user.id};", False)
                     if passed:
-                        await ctx.send(f"{amount} coins transferred to {user.display_name}")
+                        await ctx.send(f"{amount} coins transferred to {user.nick}")
     if not passed:
         await ctx.send(str(response))
 
@@ -343,26 +337,26 @@ async def give(ctx, user: discord.Member, amount: int):
 async def inject(ctx, user: discord.Member, amount: int):
     if not await bot.is_owner(ctx.author):
         await ctx.send("you do not have permission to use this command")
-    response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{user.id}';", True)
+    response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {user.id};", True)
     if passed and not response:
         await ctx.send("they have not joined the ducknasty (/initiate)")
     elif passed:
-        response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + amount} WHERE uid = '{user.id}';", False)
+        response, passed = run_SQL(f"UPDATE members SET money = {int(response[0][0]) + amount} WHERE m_id = {user.id};", False)
         if passed:
-            await ctx.send(f"{amount} coins added to {user.display_name}")
+            await ctx.send(f"{amount} coins added to {user.nick}")
     if not passed:
         await ctx.send(str(response))
 
 @bot.command(name="bank", help="check how many coins you have")
 async def bank(ctx, user: discord.Member = None):
     if user:
-        response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{user.id}';", True)
+        response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {user.id};", True)
         if passed and not response:
-            await ctx.send(f"{user.display_name} has not joined the ducknasty yet (/initiate)")
+            await ctx.send(f"{user.nick} has not joined the ducknasty yet (/initiate)")
         elif passed:
-            await ctx.send(f"{user.display_name} has {response[0][0]} coins")
+            await ctx.send(f"{user.nick} has {response[0][0]} coins")
     else:
-        response, passed = run_SQL(f"SELECT money FROM members WHERE uid = '{ctx.author.id}';", True)
+        response, passed = run_SQL(f"SELECT money FROM members WHERE m_id = {ctx.author.id};", True)
         if passed and not response:
             await ctx.send("you have not joined the ducknasty yet or have change your name since (/initiate)")
         elif passed:
@@ -383,11 +377,11 @@ async def shop(ctx, item=None):
             txt += "\n/shop [item name] to buy item"
             await ctx.send(txt)
     else:
-        response, passed = run_SQL(f"SELECT uid, money, items FROM members WHERE uid = '{ctx.author.id}';", True)
+        response, passed = run_SQL(f"SELECT m_id, money, items FROM members WHERE m_id = {ctx.author.id};", True)
         if passed and not response:
             await ctx.send("you haven't joined the ducknasty (/initiate)")
         elif passed:
-            uid, money, items = response[0]
+            m_id, money, items = response[0]
             response, passed = run_SQL(f"SELECT item, price FROM shop WHERE item = '{item}';", True)
             if passed and not response:
                 await ctx.send(f"couldn't find item ({item})")
@@ -399,7 +393,7 @@ async def shop(ctx, item=None):
                     await ctx.send(f"can't afford item ({price} coins)")
                 else:
                     items += ' ' + item
-                    response, passed = run_SQL(f"UPDATE members SET money = {int(money) - int(price)}, items = '{items.strip()}' WHERE uid = '{ctx.author.id}';", False)
+                    response, passed = run_SQL(f"UPDATE members SET money = {int(money) - int(price)}, items = '{items.strip()}' WHERE m_id = {ctx.author.id};", False)
                     if passed:
                         await ctx.send(f"{item} bought")
     if not passed:
@@ -542,7 +536,7 @@ async def test(ctx):
 @bot.event
 async def on_raw_reaction_add(reaction):
     if reaction.channel_id == AUTOROLE_CID:
-        response, passed = run_SQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message_id} AND emote = '{reaction.emoji}';", True)
+        response, passed = run_SQL(f"SELECT r_id FROM reactionroles WHERE msg_id = {reaction.message_id} AND emote = '{reaction.emoji}';", True)
         guild = bot.get_guild(reaction.guild_id)
         if passed:
             if response:
@@ -556,7 +550,7 @@ async def on_raw_reaction_add(reaction):
 @bot.event
 async def on_raw_reaction_remove(reaction):
     if reaction.channel_id == AUTOROLE_CID:
-        response, passed = run_SQL(f"SELECT r_id FROM reactionroles WHERE m_id = {reaction.message_id} AND emote = '{reaction.emoji}';", True)
+        response, passed = run_SQL(f"SELECT r_id FROM reactionroles WHERE msg_id = {reaction.message_id} AND emote = '{reaction.emoji}';", True)
         guild = bot.get_guild(reaction.guild_id)
         if passed:
             if response:
@@ -587,13 +581,13 @@ async def on_message(msg):
                         await msg.channel.send(f"{table} created")
             return
         if msg.content[0] == '/':
-            if msg.content[1:3] in googletrans.LANGUAGES.keys():
-                txt = f"{msg.author.display_name}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
+            if msg.content[1:3] in googletrans.LANGUAGES.keys() and msg.content[3] == ' ':
+                txt = f"{msg.author.nick}: {translator.translate(msg.content[3:], dest=msg.content[1:3]).text}"
                 await msg.channel.send(txt)
             else:
                 await custom_command(msg.channel, msg.author.id, msg.content)
         else:
-            await passover(msg.guild, msg.author.id, msg.author.display_name)
+            await passover(msg.guild, msg.author.id, msg.author.nick)
 
 
 ###   LOOPS   ###
