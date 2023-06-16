@@ -12,7 +12,7 @@ CHANGELOG = "QuackslyII 1.1: reformatting under the hood"
 status = cycle(["with his disciples", "duck sim 2K22", "god", "duck, duck, goose", "the battle of polytopia", "with sacred scripture", "in holy water", "with rubber ducks", "king's choice", "with his latest sacrifices"])
 
 SCHEMAS = {
-    "reactionroles": "CREATE TABLE reactionroles (msg_id INTEGER NOT NULL, emote TEXT NOT NULL, r_id INTEGER NOT NULL, PRIMARY KEY (m_id, emote));",
+    "reactionroles": "CREATE TABLE reactionroles (msg_id INTEGER NOT NULL, emote TEXT NOT NULL, r_id INTEGER NOT NULL, PRIMARY KEY (msg_id, emote));",
     "members": "CREATE TABLE members (m_id INTEGER PRIMARY KEY NOT NULL UNIQUE, money INTEGER NOT NULL, daily TEXT, items TEXT);",
     "ball": "CREATE TABLE ball (username TEXT PRIMARY KEY NOT NULL UNIQUE, compliment INTEGER, insult INTEGER);",
     "commands": "CREATE TABLE commands (request	TEXT PRIMARY KEY NOT NULL UNIQUE, response TEXT NOT NULL, creator_id INTEGER NOT NULL, image TEXT);",
