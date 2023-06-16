@@ -50,7 +50,10 @@ async def custom_command(channel, m_id, request):
             await channel.send(f"i could not find that command ({request})")
         elif passed:
             if response[0][1] == 'T':
-                await channel.send(file=discord.File(response[0][0]))
+                try:
+                    await channel.send(file=discord.File(response[0][0]))
+                except FileNotFoundError:
+                    await channel.send(f"file not found (path: {response[0][0]})")
             else:
                 await channel.send(response[0][0])
     elif passed:
