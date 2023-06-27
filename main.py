@@ -120,7 +120,7 @@ async def rr(ctx, messageID=commands.parameter(description="-> the id of the mes
         await ctx.send(response)
         return
     await msg.add_reaction(emoji)
-    await ctx.send("reaction role added")
+    await ctx.send(f"added {role} as {emoji} reaction")
 
 @bot.command(name="drr", help="delete a reaction-role link\n/drr [message ID] [emoji]", brief="Deletes a reaction-role link", hidden=True)
 async def drr(ctx, messageID=commands.parameter(description="-> the id of the message to delete the link from"), emoji=commands.parameter(description="the emoji of the link to delete")):
