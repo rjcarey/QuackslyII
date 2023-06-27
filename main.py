@@ -535,8 +535,7 @@ async def klausify(ctx, *args):
 
 @bot.command(name="test", brief="Temp test command", usage="this is the usage")
 async def test(ctx):
-    await ctx.send(ctx.command.signature)
-
+    await ctx.send(f"display name: {ctx.author.display_name}\nglobal name: {ctx.author.global_name}\nname: {ctx.author.name}\nnick: {ctx.author.nick}")
 
 ###   LISTENERS   ###
 @bot.event
