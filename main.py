@@ -597,7 +597,8 @@ async def on_message(msg):
             else:
                 await custom_command(msg.channel, msg.author.id, msg.content)
         else:
-            await passover(msg.guild, msg.author.id, msg.author.nick)
+            nick = msg.author.nick if msg.author.nick is not None else msg.author.display_name
+            await passover(msg.guild, msg.author.id, nick)
 
 
 ###   LOOPS   ###
